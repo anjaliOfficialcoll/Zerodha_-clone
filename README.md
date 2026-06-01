@@ -1,98 +1,330 @@
+# 📈 Zerodha Clone – Full-Stack Stock Trading Platform
 
-# Zerodha-clone — Local Development
+A modern, full-stack stock trading platform inspired by [Zerodha](https://zerodha.com/). Built with **React**, **Express.js**, and **MongoDB**, this project demonstrates a complete real-world application architecture with authentication, order management, and portfolio tracking.
 
-Small demo project consisting of:
+---
 
-- `frontend/` — public landing site (React)
-- `dashboard/` — dashboard SPA (React) that requires sign-in
-- `backend/` — Express API used for demo data and protected order creation
+## 🎯 Features
 
-This README explains how to run the apps locally, the demo auth flow, and useful developer commands.
+✅ **User Authentication** – JWT-based login with demo credentials  
+✅ **Dashboard SPA** – Protected trading dashboard with real-time portfolio insights  
+✅ **Order Management** – Create, view, and manage stock orders  
+✅ **Holdings & Positions** – Track portfolio holdings and open positions  
+✅ **Landing Page** – Public-facing marketing site  
+✅ **REST API** – Robust backend API with protected endpoints  
+✅ **Responsive Design** – Mobile-friendly UI with modern styling  
 
-Prerequisites
--------------
-- Node.js 18+ (includes `fetch` used by the test script)
-- npm
+---
 
-Environment
------------
-- Backend reads these env vars (optional):
-  - `PORT` (default `3002`)
-  - `MONGO_URL` (if you want to persist data via MongoDB)
-  - `JWT_SECRET` (default development secret if not provided)
-  - `DEMO_EMAIL` / `DEMO_PASS` (defaults: `demo@demo.com` / `demo`)
+## 📁 Project Structure
 
-Run the apps (development)
---------------------------
-1. Backend
+```
+Zerodha_-clone/
+├── frontend/          # Public landing site (React)
+├── dashboard/         # Trading dashboard SPA (React) - Requires auth
+├── backend/           # Express.js API server
+├── README.md          # Project documentation
+└── .gitignore         # Git ignore rules
+```
 
-```powershell
+| Component | Purpose | Tech Stack |
+|-----------|---------|-----------|
+| **Frontend** | Marketing/landing page | React, CSS |
+| **Dashboard** | Trading interface & portfolio | React, Axios, Context API |
+| **Backend** | API & business logic | Express.js, JWT, MongoDB (optional) |
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Node.js 18+** (includes native `fetch`)
+- **npm 8+**
+- **(Optional) MongoDB** – for data persistence
+
+### Installation & Running
+
+#### 1️⃣ Start the Backend
+
+```bash
 cd backend
 npm install
 npm start
-# server listens on http://localhost:3002 by default
 ```
 
-2. Dashboard (protected SPA)
+Backend runs on `http://localhost:3002` by default.
 
-```powershell
+#### 2️⃣ Start the Dashboard
+
+```bash
 cd dashboard
 npm install
 npm start
-# opens http://localhost:3000 by default
 ```
 
-3. Landing frontend
+Dashboard runs on `http://localhost:3000` by default.
 
-```powershell
+#### 3️⃣ Start the Frontend (Landing Page)
+
+```bash
 cd frontend
 npm install
 npm start
-# opens http://localhost:3001 (or whatever CRA assigns)
 ```
 
-Demo login (local)
-------------------
-- Demo credentials (development only):
-  - Email: `demo@demo.com`
-  - Password: `demo`
+Frontend runs on `http://localhost:3001` by default.
 
-- Behavior: POST `/login` returns `{ token, user }`. The dashboard stores the JWT in `localStorage` and sends it as `Authorization: Bearer <token>` on requests.
+---
 
-API endpoints (quick reference)
-------------------------------
-- POST `/login` — body `{ email, password }` -> `{ token, user }` on success
-- POST `/newOrder` — protected: creates an order; requires `Authorization` header
-- GET `/allHoldings` — returns demo holdings
-- GET `/allPositions` — returns demo positions
-- GET `/addHoldings`, `/addPositions` — helper routes to seed demo data
+## 🔐 Authentication & Demo Credentials
 
-Developer utilities
--------------------
-- Run a smoke-test that calls `/login` then `/newOrder`:
+### Default Demo Login
 
-```powershell
+```
+Email:    demo@demo.com
+Password: demo
+```
+
+### Auth Flow
+
+1. User enters credentials on the login page
+2. Frontend sends `POST /login` request to backend
+3. Backend validates credentials and returns JWT token + user info
+4. Frontend stores token in `localStorage`
+5. Subsequent requests include `Authorization: Bearer <token>` header
+6. Protected endpoints verify token validity
+
+### AuthContext
+
+The dashboard uses React's `AuthContext` to:
+- Store JWT token and user data globally
+- Set default `Authorization` header in axios
+- Protect routes from unauthorized access
+
+---
+
+## 🔌 API Reference
+
+### Authentication Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/login` | Authenticate user, returns JWT token |
+
+**Request:**
+```json
+{
+  "email": "demo@demo.com",
+  "password": "demo"
+}
+```
+
+**Response:**
+```json
+{
+  "token": "eyJhbGc...",
+  "user": {
+    "id": "123",
+    "email": "demo@demo.com",
+    "name": "Demo User"
+  }
+}
+```
+
+### Protected Endpoints (Requires JWT)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/newOrder` | Create a new stock order |
+
+**Request:**
+```json
+{
+  "name": "INFY",
+  "qty": 10,
+  "price": 1500,
+  "mode": "BUY"
+}
+```
+
+### Public Data Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/allHoldings` | Fetch all portfolio holdings |
+| `GET` | `/allPositions` | Fetch all open positions |
+| `GET` | `/addHoldings` | Seed demo holdings data |
+| `GET` | `/addPositions` | Seed demo positions data |
+
+---
+
+## 🛠️ Environment Configuration
+
+Create a `.env` file in the `backend/` directory:
+
+```bash
+# Backend Port (default: 3002)
+PORT=3002
+
+# MongoDB Connection (optional - uses in-memory storage if not set)
+MONGO_URL=mongodb://localhost:27017/zerodha-clone
+
+# JWT Secret (default: dev-secret-key - DO NOT use in production)
+JWT_SECRET=your-secret-key-here
+
+# Demo Credentials (can be overridden)
+DEMO_EMAIL=demo@demo.com
+DEMO_PASS=demo
+```
+
+---
+
+## 🧪 Testing
+
+### Run API Smoke Test
+
+Test the complete auth flow and order creation:
+
+```bash
 cd backend
 npm run test-api
 ```
 
-What I changed (high level)
----------------------------
-- Added a simple JWT demo auth flow in `backend/index.js` (demo creds, `jsonwebtoken`).
-- Dashboard now contains `AuthContext` which persists token+user and sets `axios` default `Authorization` header.
-- `BuyActionWindow` and `/newOrder` are protected to ensure only authenticated requests create orders.
+This script will:
+1. Call `/login` with demo credentials
+2. Retrieve the JWT token
+3. Call `/newOrder` with the token
+4. Display success/failure results
 
-Security notes (important)
---------------------------
-- The current auth is a local demo flow only — DO NOT use the demo JWT secret or credentials in production.
-- Replace the demo login with a proper user store (database), hashed passwords (bcrypt), and a secure JWT signing secret or sessions.
-- Validate and sanitize all request inputs on the server before saving to the DB.
+---
 
-Next recommended tasks
-----------------------
-- Replace demo credentials with a persisted user table + password hashing
-- Add server-side validation and unit/integration tests (e.g., Jest + supertest)
-- Improve the login UI: loading state, error display, and remember-me option
-- Add a small README in each subfolder with service-specific commands
+## 📚 Key Implementation Details
 
-If you want, I can implement any of the recommended next steps — tell me which one to start with.
+### JWT Authentication (Backend)
+
+- Located in `backend/index.js`
+- Uses `jsonwebtoken` library for token generation and verification
+- Middleware validates `Authorization: Bearer <token>` headers
+- Protected routes check token validity before processing
+
+### State Management (Dashboard)
+
+- **AuthContext** – Manages global authentication state
+- **Axios Interceptors** – Auto-includes JWT token in requests
+- **localStorage** – Persists token across sessions
+
+### Order Creation
+
+- Protected endpoint validates JWT token
+- `BuyActionWindow` component handles order form
+- Orders sent to `/newOrder` endpoint with auth header
+- Success/error handling with user feedback
+
+---
+
+## ⚠️ Security Notes
+
+> ⚠️ **This is a demo project for educational purposes only.**
+
+**Current Limitations:**
+- Demo credentials and JWT secret are hardcoded
+- No password hashing (plain text storage)
+- No input validation or sanitization
+- No rate limiting or CSRF protection
+- No SSL/TLS in development
+
+### ✅ Production Recommendations
+
+- **User Management** – Use a proper database with bcrypt password hashing
+- **JWT Security** – Use a strong, secret key; rotate keys regularly
+- **Input Validation** – Sanitize and validate all user inputs server-side
+- **HTTPS** – Enforce SSL/TLS in production
+- **Rate Limiting** – Add request throttling to prevent abuse
+- **CORS** – Configure strict CORS policies
+- **Logging** – Implement comprehensive logging and monitoring
+- **Testing** – Add unit/integration tests (Jest, Supertest)
+- **Error Handling** – Don't expose sensitive stack traces to clients
+
+---
+
+## 🗺️ Roadmap & Next Steps
+
+- [ ] Replace demo credentials with persistent user database
+- [ ] Implement bcrypt password hashing
+- [ ] Add comprehensive server-side validation
+- [ ] Build unit and integration tests (Jest + Supertest)
+- [ ] Enhance login UI (loading states, error messages, remember-me)
+- [ ] Add order history and trade analytics
+- [ ] Implement real-time price updates (WebSocket)
+- [ ] Add fund transfer and payment integration
+- [ ] Deploy to production (Heroku, AWS, etc.)
+
+---
+
+## 🔧 Troubleshooting
+
+### Backend won't start
+```bash
+# Clear npm cache and reinstall
+rm -rf node_modules package-lock.json
+npm install
+npm start
+```
+
+### Dashboard can't connect to backend
+- Verify backend is running on `http://localhost:3002`
+- Check CORS headers in backend (if running on different port)
+- Open browser DevTools → Network tab to see error details
+
+### Login fails with demo credentials
+- Ensure backend is running
+- Check that `Authorization` header is being sent
+- Verify JWT_SECRET matches between login and protected endpoints
+
+### MongoDB connection issues
+- If `MONGO_URL` not set, app uses in-memory storage (no persistence)
+- Ensure MongoDB service is running: `mongod`
+- Check connection string format: `mongodb://localhost:27017/db-name`
+
+---
+
+## 📖 Additional Documentation
+
+- **[Frontend Setup](./frontend/README.md)** *(Create this)*
+- **[Dashboard Setup](./dashboard/README.md)** *(Create this)*
+- **[Backend API Docs](./backend/README.md)** *(Create this)*
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! To contribute:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📝 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+---
+
+## 💡 Inspiration
+
+Built as a learning project inspired by [Zerodha](https://zerodha.com/), one of India's leading stock brokerage platforms. This project demonstrates real-world full-stack development patterns including authentication, API design, and state management.
+
+---
+
+## 📧 Support
+
+Have questions? Open an [issue](https://github.com/anjaliOfficialcoll/Zerodha_-clone/issues) on GitHub!
+
+---
+
+**Made with ❤️ by [anjaliOfficialcoll](https://github.com/anjaliOfficialcoll)**
